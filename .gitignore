@@ -2,3 +2,7 @@ __pycache__/
 *.pyc
 .playwright-mcp/
 .DS_Store
+*.png
+!charts/*.png
+forensic_*.png
+datasite_full.png
