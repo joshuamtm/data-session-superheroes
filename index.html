@@ -1,0 +1,452 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Superhero Recovery — Data Session</title>
+<meta name="color-scheme" content="light">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>%F0%9F%A6%B8</text></svg>">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js" integrity="sha384-JUh163oCRItcbPme8pYnROHQMC6fNKTBWtRG3I3I0erJkzNgL7uxKlNwcrcFKeqF" crossorigin="anonymous"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/atom-one-dark.min.css" integrity="sha384-oaMLBGEzBOJx3UHwac0cVndtX5fxGQIfnAeFZ35RTgqPcYlbprH9o9PUV/F8Le07" crossorigin="anonymous">
+<script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/highlight.min.js" integrity="sha384-F/bZzf7p3Joyp5psL90p/p89AZJsndkSoGwRpXcZhleCWhd8SnRuoYo4d0yirjJp" crossorigin="anonymous"></script>
+<style>
+:root{--navy:#1c487b;--teal:#2bb3a3;--gold:#d9a521;--cream:#f7f5ef;--ink:#1f2933;--mut:#5b6770;--line:#e6e2d8;}
+*{box-sizing:border-box}
+body{margin:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;
+ color:var(--ink);background:var(--cream);line-height:1.6}
+.wrap{max-width:920px;margin:0 auto;padding:0 20px}
+header{background:var(--navy);color:#fff;padding:38px 0 30px}
+header .badge{display:inline-block;background:rgba(255,255,255,.15);color:#dcebff;font-size:12px;
+ font-weight:600;padding:4px 11px;border-radius:20px;letter-spacing:.3px}
+header h1{margin:14px 0 6px;font-size:30px;line-height:1.2}
+header p.sub{margin:0;color:#bcd4ec;font-size:15px}
+.rq{background:#fff;border-left:5px solid var(--teal);border-radius:8px;margin:26px 0;padding:18px 22px;
+ box-shadow:0 1px 3px rgba(0,0,0,.05)}
+.rq b{color:var(--navy)}
+section{padding:30px 0;border-bottom:1px solid var(--line)}
+h2{color:var(--navy);font-size:22px;margin:0 0 4px}
+h2 .n{color:var(--teal);font-weight:800;margin-right:8px}
+.lead{color:var(--mut);margin:0 0 18px;font-size:15px}
+.answer{background:#fff;border:1px solid var(--line);border-radius:10px;overflow:hidden;margin:8px 0 4px}
+.answer table{width:100%;border-collapse:collapse;font-size:14.5px}
+.answer th,.answer td{padding:11px 16px;text-align:left;border-top:1px solid var(--line)}
+.answer th{background:#eef4fa;color:var(--navy)}
+.bad{color:#b23b34;font-weight:700}.good{color:#16876f;font-weight:700}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:16px 0}
+.card{background:#fff;border:1px solid var(--line);border-radius:10px;padding:14px 16px}
+.card .big{font-size:24px;font-weight:800;color:var(--navy)}
+.card .lbl{font-size:12.5px;color:var(--mut)}
+ul.flags{list-style:none;padding:0;margin:0}
+ul.flags li{background:#fff;border:1px solid var(--line);border-left:4px solid #d9534f;border-radius:8px;
+ padding:10px 14px;margin:8px 0;font-size:14.5px}
+ul.flags li.subtle{border-left-color:var(--gold)}
+.chartbox{background:#fff;border:1px solid var(--line);border-radius:10px;padding:16px;margin:14px 0}
+.chartbox h3{margin:0 0 4px;color:var(--navy);font-size:16px}
+.chartbox p{margin:0 0 12px;font-size:13.5px;color:var(--mut)}
+.toggle{font-size:13px;color:var(--navy);cursor:pointer;user-select:none;display:inline-flex;align-items:center;gap:7px}
+.toggle input{transform:scale(1.15)}
+.gallery{display:grid;grid-template-columns:1fr;gap:14px}
+.gallery img{width:100%;border:1px solid var(--line);border-radius:10px;background:#fff}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:0}
+.tabs button{background:#e9eef3;border:none;color:var(--navy);font-weight:600;font-size:13px;
+ padding:8px 14px;border-radius:8px 8px 0 0;cursor:pointer}
+.tabs button.active{background:#282c34;color:#fff}
+pre{margin:0;border-radius:0 10px 10px 10px;max-height:460px;overflow:auto}
+pre code{font-size:12.5px;line-height:1.5}
+.takeaway{background:var(--navy);color:#fff;border-radius:10px;padding:20px 24px;margin:10px 0}
+.takeaway b{color:#9fe6d9}
+footer{padding:26px 0 50px;color:var(--mut);font-size:13px}
+footer code{background:#ece8de;padding:2px 6px;border-radius:4px;font-size:12px}
+@media(max-width:560px){header h1{font-size:24px}}
+</style></head>
+<body>
+<header><div class="wrap">
+ <span class="badge">MTM DATA SESSION · LIVING DOCUMENT · updated 2026-06-05</span>
+ <h1>Popular vs. nonpopular superheroes:<br>do they recover from injury differently?</h1>
+ <p class="sub">A worked example in data hygiene, confounding, and not trusting auto-generated analysis.</p>
+</div></header>
+
+<div class="wrap">
+
+<div class="rq"><b>Research question.</b> Are there differences between popular and nonpopular
+ superheroes regarding their ability to recover from injury? &nbsp;<i>(n = 110 heroes; 6 variables)</i></div>
+
+<section>
+ <h2><span class="n">TL;DR</span>The answer flips depending on data quality</h2>
+ <p class="lead">Run the numbers on the raw file and you "find" that popular heroes recover worse.
+  Clean the data and remove one confounding subgroup, and the effect reverses.</p>
+ <div class="answer"><table>
+  <tr><th>Approach</th><th>Result</th><th>Verdict</th></tr>
+  <tr><td><b>Naive</b> — stats on raw data</td><td>Popular heal <b>slower</b> (41.6 vs 34.7 days, MWU p=0.008)</td><td class="bad">✗ Confounded</td></tr>
+  <tr><td><b>Cleaned + de-confounded</b></td><td>Popular heal <b>faster</b> (median 27 vs 35 days, p&lt;0.001); recovery quality equal (p=0.77)</td><td class="good">✓ Real signal</td></tr>
+ </table></div>
+</section>
+
+<section>
+ <h2><span class="n">1</span>Method &amp; approach</h2>
+ <ul>
+  <li><b>"Popularity" has no column</b> → operationalized as <code>number_of_superhero_friends</code> (median split, <em>and</em> kept continuous so the answer doesn't hinge on a cutoff).</li>
+  <li><b>"Recovery" is two things</b> → tested both <code>injury_heal_time_days</code> (lower = better) and <code>recovery_quality_score</code> (higher = better).</li>
+  <li><b>Robust + parametric side by side</b> — Welch t-test, Mann–Whitney U, Spearman, medians. The disagreements between them are what exposed the traps.</li>
+  <li><b>Checked confounds</b> — power usage, outfit color, and a distinct subgroup.</li>
+ </ul>
+</section>
+
+<section>
+ <h2><span class="n">2</span>The data-quality traps</h2>
+ <p class="lead">Before any test: eyeball the min/max. This file is salted with errors.</p>
+ <ul class="flags">
+  <li><b>Negative heal time</b> — 2 heroes heal in −5 and −8 days (impossible)</li>
+  <li><b>Negative friends</b> — 1 hero has −7 friends (impossible)</li>
+  <li><b>Power &gt; 24 h/day</b> — 1 hero "uses powers" 180 hours per day</li>
+  <li class="subtle"><b>Missing values</b> — 2 heroes have no power-usage value</li>
+ </ul>
+ <div class="chartbox"><h3>Red flags in the raw file</h3>
+  <p>4 rows have impossible values and were removed (110 → 106).</p>
+  <img src="charts/data_quality.png" alt="Data quality flags" style="width:100%;border-radius:8px"></div>
+ <p style="font-size:14.5px"><b>The bigger trap — a confounding subgroup.</b> The 10 <span style="color:var(--gold);font-weight:700">gold-outfit</span>
+  heroes are a distinct cluster: ~44 friends <em>and</em> ~91-day heal times, vs. ~9 friends / ~31 days for everyone else.
+  Being both high-popularity and slow-healing, they single-handedly manufacture the "popularity hurts recovery" headline — a
+  textbook <b>Simpson's paradox</b>.</p>
+</section>
+
+<section>
+ <h2><span class="n">3</span>Interactive analysis</h2>
+ <p class="lead">Toggle the gold subgroup to watch the relationship reverse.</p>
+ <div class="cards">
+  <div class="card"><div class="big">−0.77</div><div class="lbl">Spearman ρ, friends vs heal time <em>(regular heroes)</em> — more friends, faster heal</div></div>
+  <div class="card"><div class="big">−0.31</div><div class="lbl">…diluted to this when the gold cluster is mixed back in</div></div>
+  <div class="card"><div class="big">ρ ≈ 0.00</div><div class="lbl">friends vs recovery <em>quality</em> (no real link)</div></div>
+  <div class="card"><div class="big">106 / 110</div><div class="lbl">valid rows after cleaning</div></div>
+ </div>
+
+ <div class="chartbox">
+  <h3>Friends vs. heal time — the Simpson's paradox</h3>
+  <p>Each point is a hero. The dashed line is the trend among regular heroes (downward = more friends → faster heal).</p>
+  <label class="toggle"><input type="checkbox" id="goldToggle" checked> Show gold subgroup</label>
+  <canvas id="scatter" height="170"></canvas>
+ </div>
+
+ <div class="chartbox">
+  <h3>Median heal time: popular vs nonpopular</h3>
+  <p>Grey = raw (all heroes). Teal = with the gold confound removed. Watch the bars cross.</p>
+  <canvas id="bars" height="150"></canvas>
+ </div>
+</section>
+
+<section>
+ <h2><span class="n">4</span>Static visuals</h2>
+ <p class="lead">Regeneratable PNGs (for slides / sharing) — produced by <code>make_charts.py</code>.</p>
+ <div class="gallery">
+  <img src="charts/scatter_simpsons.png" alt="Simpson's paradox scatter">
+  <img src="charts/bars_reversal.png" alt="Effect reversal bars">
+ </div>
+</section>
+
+<section>
+ <h2><span class="n">5</span>The code</h2>
+ <p class="lead">Every number above is reproducible. Three scripts, shown in full.</p>
+ <div class="tabs" id="tabs">
+  <button class="active" data-t="c1">analysis.py</button>
+  <button data-t="c2">analysis_clean.py</button>
+  <button data-t="c3">make_charts.py</button>
+ </div>
+ <div id="c1" class="codepane"><pre><code class="language-python">&quot;&quot;&quot;
+Superhero recovery analysis
+Research question: Are there differences between popular and nonpopular
+superheroes regarding their ability to recover from injury?
+
+Approach:
+- &quot;Popularity&quot; has no direct column -&gt; operationalize via number_of_superhero_friends.
+- &quot;Recovery from injury&quot; has TWO measures:
+    injury_heal_time_days   (lower = better recovery)
+    recovery_quality_score  (higher = better recovery)
+- Compare popular vs nonpopular (median split on friends), AND
+  treat friends as continuous (correlation) so the answer doesn&#x27;t hinge on
+  an arbitrary cutoff.
+- Check obvious confounds (power usage, outfit color).
+&quot;&quot;&quot;
+import pandas as pd, numpy as np
+from scipy import stats
+
+df = pd.read_csv(&quot;superheroes_dataset.csv&quot;)
+
+print(&quot;=&quot;*70)
+print(&quot;1. DATA PROFILE&quot;)
+print(&quot;=&quot;*70)
+print(f&quot;rows={len(df)}  cols={df.shape[1]}&quot;)
+print(&quot;missing values:\n&quot;, df.isna().sum().to_string())
+num = [&quot;number_of_superhero_friends&quot;,&quot;injury_heal_time_days&quot;,
+       &quot;recovery_quality_score&quot;,&quot;average_hours_of_superhero_power_used_per_day&quot;]
+print(&quot;\nnumeric summary:\n&quot;, df[num].describe().round(2).to_string())
+print(&quot;\noutfit_color_code counts:\n&quot;, df[&quot;outfit_color_code&quot;].value_counts().to_string())
+
+# ---- Define popularity (median split on friends) ----
+med = df[&quot;number_of_superhero_friends&quot;].median()
+df[&quot;popular&quot;] = np.where(df[&quot;number_of_superhero_friends&quot;] &gt; med, &quot;popular&quot;, &quot;nonpopular&quot;)
+print(&quot;\n&quot; + &quot;=&quot;*70)
+print(f&quot;2. POPULARITY DEFINITION  (median friends = {med}; &#x27;&gt;median&#x27; = popular)&quot;)
+print(&quot;=&quot;*70)
+print(df[&quot;popular&quot;].value_counts().to_string())
+
+def compare(col, higher_is_better):
+    pop = df.loc[df.popular==&quot;popular&quot;, col]
+    non = df.loc[df.popular==&quot;nonpopular&quot;, col]
+    t, p_t = stats.ttest_ind(pop, non, equal_var=False)
+    u, p_u = stats.mannwhitneyu(pop, non, alternative=&quot;two-sided&quot;)
+    # Cohen&#x27;s d (pooled)
+    nx, ny = len(pop), len(non)
+    sp = np.sqrt(((nx-1)*pop.var(ddof=1)+(ny-1)*non.var(ddof=1))/(nx+ny-2))
+    d = (pop.mean()-non.mean())/sp
+    better = &quot;popular&quot; if (pop.mean()&gt;non.mean())==higher_is_better else &quot;nonpopular&quot;
+    print(f&quot;\n--- {col}  ({&#x27;higher&#x27; if higher_is_better else &#x27;lower&#x27;} = better) ---&quot;)
+    print(f&quot;  popular   : mean={pop.mean():.2f}  median={pop.median():.1f}  sd={pop.std():.2f}&quot;)
+    print(f&quot;  nonpopular: mean={non.mean():.2f}  median={non.median():.1f}  sd={non.std():.2f}&quot;)
+    print(f&quot;  Welch t={t:.2f}  p={p_t:.4f} | Mann-Whitney U p={p_u:.4f} | Cohen&#x27;s d={d:+.2f}&quot;)
+    print(f&quot;  -&gt; direction favors: {better}   {&#x27;(SIG p&lt;.05)&#x27; if min(p_t,p_u)&lt;.05 else &#x27;(n.s.)&#x27;}&quot;)
+    return min(p_t, p_u)
+
+print(&quot;\n&quot; + &quot;=&quot;*70)
+print(&quot;3. GROUP COMPARISON: popular vs nonpopular recovery&quot;)
+print(&quot;=&quot;*70)
+p1 = compare(&quot;injury_heal_time_days&quot;, higher_is_better=False)
+p2 = compare(&quot;recovery_quality_score&quot;, higher_is_better=True)
+
+print(&quot;\n&quot; + &quot;=&quot;*70)
+print(&quot;4. ROBUSTNESS: friends as CONTINUOUS (no arbitrary cutoff)&quot;)
+print(&quot;=&quot;*70)
+for col in [&quot;injury_heal_time_days&quot;,&quot;recovery_quality_score&quot;]:
+    r,p = stats.pearsonr(df[&quot;number_of_superhero_friends&quot;], df[col])
+    rho,ps = stats.spearmanr(df[&quot;number_of_superhero_friends&quot;], df[col])
+    print(f&quot;  friends vs {col:24s}: Pearson r={r:+.2f} (p={p:.3f}) | Spearman rho={rho:+.2f} (p={ps:.3f})&quot;)
+
+print(&quot;\n&quot; + &quot;=&quot;*70)
+print(&quot;5. CONFOUND CHECK&quot;)
+print(&quot;=&quot;*70)
+print(&quot;  Does power usage relate to friends or recovery?&quot;)
+for a,b in [(&quot;number_of_superhero_friends&quot;,&quot;average_hours_of_superhero_power_used_per_day&quot;),
+            (&quot;average_hours_of_superhero_power_used_per_day&quot;,&quot;injury_heal_time_days&quot;),
+            (&quot;average_hours_of_superhero_power_used_per_day&quot;,&quot;recovery_quality_score&quot;)]:
+    r,p = stats.pearsonr(df[a], df[b])
+    print(f&quot;    {a}  vs  {b}: r={r:+.2f} (p={p:.3f})&quot;)
+
+print(&quot;\n  Recovery by outfit color (mean heal_time / quality):&quot;)
+print(df.groupby(&quot;outfit_color_code&quot;)[[&quot;injury_heal_time_days&quot;,&quot;recovery_quality_score&quot;]]
+        .agg([&quot;mean&quot;,&quot;count&quot;]).round(2).to_string())
+
+print(&quot;\n&quot; + &quot;=&quot;*70)
+print(&quot;VERDICT&quot;)
+print(&quot;=&quot;*70)
+sig = &quot;YES&quot; if min(p1,p2) &lt; .05 else &quot;NO&quot;
+print(f&quot;  Significant popular-vs-nonpopular recovery difference? {sig} (best p={min(p1,p2):.4f})&quot;)
+</code></pre></div>
+ <div id="c2" class="codepane" style="display:none"><pre><code class="language-python">&quot;&quot;&quot;
+Superhero recovery analysis — CLEANED + SEGMENTED (v2)
+RQ: Are there differences between popular and nonpopular superheroes in
+    their ability to recover from injury?
+
+What v1 exposed:
+- 4 impossible rows (negative heal time x2, negative friends x1, power=180 x1)
+- A &#x27;gold&#x27; subgroup (n=10) that is BOTH high-friend AND high-heal-time, which
+  single-handedly drives a spurious &quot;popular = slower recovery&quot; result.
+- Pearson(+0.77) vs Spearman(-0.29) sign flip = outliers hijacking the stat.
+&quot;&quot;&quot;
+import pandas as pd, numpy as np
+from scipy import stats
+
+raw = pd.read_csv(&quot;superheroes_dataset.csv&quot;)
+
+# ---- 1. Clean impossible values ----
+mask_bad = (raw.number_of_superhero_friends &lt; 0) | (raw.injury_heal_time_days &lt; 0) \
+         | (raw.average_hours_of_superhero_power_used_per_day &gt; 24)
+df = raw.loc[~mask_bad].copy()
+print(f&quot;Removed {mask_bad.sum()} impossible rows -&gt; n={len(df)} (from {len(raw)})&quot;)
+
+med = df.number_of_superhero_friends.median()
+df[&quot;popular&quot;] = np.where(df.number_of_superhero_friends &gt; med, &quot;popular&quot;, &quot;nonpopular&quot;)
+
+def compare(data, col, higher_better, label):
+    pop = data.loc[data.popular==&quot;popular&quot;, col]; non = data.loc[data.popular==&quot;nonpopular&quot;, col]
+    u,pu = stats.mannwhitneyu(pop, non, alternative=&quot;two-sided&quot;)
+    t,pt = stats.ttest_ind(pop, non, equal_var=False)
+    print(f&quot;  [{label}] {col} ({&#x27;hi&#x27; if higher_better else &#x27;lo&#x27;}=better): &quot;
+          f&quot;popular med={pop.median():.1f} mean={pop.mean():.1f} | &quot;
+          f&quot;nonpop med={non.median():.1f} mean={non.mean():.1f} | &quot;
+          f&quot;MWU p={pu:.3f} Welch p={pt:.3f}&quot;)
+
+print(&quot;\n== A) Cleaned, ALL heroes (gold subgroup still included) ==&quot;)
+compare(df, &quot;injury_heal_time_days&quot;, False, &quot;all&quot;)
+compare(df, &quot;recovery_quality_score&quot;, True, &quot;all&quot;)
+
+print(&quot;\n== B) Cleaned, EXCLUDING the gold subgroup (the confound) ==&quot;)
+ng = df[df.outfit_color_code != &quot;gold&quot;].copy()
+ng[&quot;popular&quot;] = np.where(ng.number_of_superhero_friends &gt; ng.number_of_superhero_friends.median(),
+                         &quot;popular&quot;,&quot;nonpopular&quot;)
+compare(ng, &quot;injury_heal_time_days&quot;, False, &quot;no-gold&quot;)
+compare(ng, &quot;recovery_quality_score&quot;, True, &quot;no-gold&quot;)
+
+print(&quot;\n== C) Robust association: friends vs recovery (Spearman, cleaned) ==&quot;)
+for sub,name in [(df,&quot;all&quot;),(ng,&quot;no-gold&quot;)]:
+    for col in [&quot;injury_heal_time_days&quot;,&quot;recovery_quality_score&quot;]:
+        rho,p = stats.spearmanr(sub.number_of_superhero_friends, sub[col])
+        print(f&quot;  [{name:7s}] friends vs {col:24s}: Spearman rho={rho:+.2f} (p={p:.3f})&quot;)
+
+print(&quot;\n== D) Is &#x27;gold&#x27; a distinct population? (mean by outfit, cleaned) ==&quot;)
+print(df.groupby(&quot;outfit_color_code&quot;)[[&quot;number_of_superhero_friends&quot;,
+      &quot;injury_heal_time_days&quot;,&quot;recovery_quality_score&quot;]].mean().round(1).to_string())
+
+print(&quot;\n== E) Power-usage confound (cleaned, NaNs dropped) ==&quot;)
+p = df.dropna(subset=[&quot;average_hours_of_superhero_power_used_per_day&quot;])
+for a,b in [(&quot;number_of_superhero_friends&quot;,&quot;injury_heal_time_days&quot;),
+            (&quot;average_hours_of_superhero_power_used_per_day&quot;,&quot;injury_heal_time_days&quot;)]:
+    rho,pv = stats.spearmanr(p[a], p[b]); print(f&quot;  {a} vs {b}: rho={rho:+.2f} (p={pv:.3f})&quot;)
+</code></pre></div>
+ <div id="c3" class="codepane" style="display:none"><pre><code class="language-python">&quot;&quot;&quot;
+Generates static PNG charts + a data.json payload for the interactive site.
+Re-run this whenever superheroes_dataset.csv changes:  python3 make_charts.py
+&quot;&quot;&quot;
+import json, pathlib
+import pandas as pd, numpy as np
+import matplotlib
+matplotlib.use(&quot;Agg&quot;)
+import matplotlib.pyplot as plt
+
+HERE = pathlib.Path(__file__).parent
+CHARTS = HERE / &quot;charts&quot;; CHARTS.mkdir(exist_ok=True)
+
+NAVY, TEAL, GOLD, GREY = &quot;#1c487b&quot;, &quot;#2bb3a3&quot;, &quot;#d9a521&quot;, &quot;#9aa5b1&quot;
+plt.rcParams.update({&quot;font.size&quot;: 11, &quot;axes.grid&quot;: True, &quot;grid.alpha&quot;: .25,
+                     &quot;axes.spines.top&quot;: False, &quot;axes.spines.right&quot;: False,
+                     &quot;figure.facecolor&quot;: &quot;white&quot;, &quot;axes.facecolor&quot;: &quot;white&quot;})
+
+raw = pd.read_csv(HERE / &quot;superheroes_dataset.csv&quot;)
+bad = (raw.number_of_superhero_friends &lt; 0) | (raw.injury_heal_time_days &lt; 0) \
+    | (raw.average_hours_of_superhero_power_used_per_day &gt; 24)
+raw[&quot;valid&quot;] = ~bad
+clean = raw[raw.valid].copy()
+clean[&quot;gold&quot;] = clean.outfit_color_code == &quot;gold&quot;
+
+# ---------- CHART 1: Simpson&#x27;s paradox scatter ----------
+fig, ax = plt.subplots(figsize=(7.2, 4.6))
+main = clean[~clean.gold]; gold = clean[clean.gold]
+ax.scatter(main.number_of_superhero_friends, main.injury_heal_time_days,
+           c=TEAL, s=42, alpha=.75, edgecolor=&quot;white&quot;, linewidth=.6, label=&quot;Regular heroes (n=%d)&quot; % len(main))
+ax.scatter(gold.number_of_superhero_friends, gold.injury_heal_time_days,
+           c=GOLD, s=70, alpha=.95, edgecolor=NAVY, linewidth=1, label=&quot;Gold subgroup (n=%d)&quot; % len(gold))
+# trend within regular heroes
+z = np.polyfit(main.number_of_superhero_friends, main.injury_heal_time_days, 1)
+xs = np.linspace(main.number_of_superhero_friends.min(), main.number_of_superhero_friends.max(), 50)
+ax.plot(xs, np.polyval(z, xs), color=NAVY, lw=2, ls=&quot;--&quot;, label=&quot;Trend (regular): more friends → faster heal&quot;)
+ax.set_xlabel(&quot;Number of superhero friends  (popularity →)&quot;)
+ax.set_ylabel(&quot;Injury heal time (days)  (↓ = better)&quot;)
+ax.set_title(&quot;The trap: one subgroup reverses the story&quot;, color=NAVY, weight=&quot;bold&quot;)
+ax.legend(fontsize=8.5, frameon=False, loc=&quot;upper left&quot;)
+fig.tight_layout(); fig.savefig(CHARTS / &quot;scatter_simpsons.png&quot;, dpi=150); plt.close(fig)
+
+# ---------- CHART 2: median heal time, popular vs nonpopular, all vs no-gold ----------
+def split(d):
+    m = d.number_of_superhero_friends.median()
+    g = np.where(d.number_of_superhero_friends &gt; m, &quot;Popular&quot;, &quot;Nonpopular&quot;)
+    return d.assign(grp=g)
+allh = split(clean); nog = split(clean[~clean.gold])
+def med(d, grp): return d.loc[d.grp == grp, &quot;injury_heal_time_days&quot;].median()
+labels = [&quot;Popular&quot;, &quot;Nonpopular&quot;]
+fig, ax = plt.subplots(figsize=(7.2, 4.2))
+x = np.arange(2); w = .36
+b1 = ax.bar(x - w/2, [med(allh, &quot;Popular&quot;), med(allh, &quot;Nonpopular&quot;)], w, color=GREY, label=&quot;All heroes (raw)&quot;)
+b2 = ax.bar(x + w/2, [med(nog, &quot;Popular&quot;), med(nog, &quot;Nonpopular&quot;)], w, color=TEAL, label=&quot;Gold subgroup removed&quot;)
+ax.set_xticks(x); ax.set_xticklabels(labels)
+ax.set_ylabel(&quot;Median heal time (days)  (↓ = better)&quot;)
+ax.set_title(&quot;Remove the confound → the effect flips&quot;, color=NAVY, weight=&quot;bold&quot;)
+ax.legend(fontsize=9, frameon=False)
+for b in list(b1)+list(b2):
+    ax.text(b.get_x()+b.get_width()/2, b.get_height()+.5, f&quot;{b.get_height():.0f}&quot;, ha=&quot;center&quot;, fontsize=9)
+fig.tight_layout(); fig.savefig(CHARTS / &quot;bars_reversal.png&quot;, dpi=150); plt.close(fig)
+
+# ---------- CHART 3: data-quality flags ----------
+fig, ax = plt.subplots(figsize=(7.2, 3.6))
+issues = {&quot;Negative heal time&quot;: int((raw.injury_heal_time_days &lt; 0).sum()),
+          &quot;Negative friends&quot;: int((raw.number_of_superhero_friends &lt; 0).sum()),
+          &quot;Power &gt; 24 h/day&quot;: int((raw.average_hours_of_superhero_power_used_per_day &gt; 24).sum()),
+          &quot;Missing power value&quot;: int(raw.average_hours_of_superhero_power_used_per_day.isna().sum())}
+ax.barh(list(issues.keys()), list(issues.values()), color=[&quot;#d9534f&quot;,&quot;#d9534f&quot;,&quot;#d9534f&quot;,GOLD])
+for i, v in enumerate(issues.values()): ax.text(v+.03, i, str(v), va=&quot;center&quot;, fontsize=10)
+ax.set_xlabel(&quot;rows affected&quot;); ax.set_title(&quot;Data-quality red flags found in the raw file&quot;, color=NAVY, weight=&quot;bold&quot;)
+ax.invert_yaxis(); fig.tight_layout(); fig.savefig(CHARTS / &quot;data_quality.png&quot;, dpi=150); plt.close(fig)
+
+# ---------- data.json for interactive charts ----------
+payload = {
+    &quot;rows&quot;: raw[[&quot;hero_id&quot;,&quot;number_of_superhero_friends&quot;,&quot;injury_heal_time_days&quot;,
+                 &quot;recovery_quality_score&quot;,&quot;outfit_color_code&quot;,
+                 &quot;average_hours_of_superhero_power_used_per_day&quot;,&quot;valid&quot;]]
+            .where(pd.notna(raw), None).to_dict(orient=&quot;records&quot;),
+    &quot;median_friends_clean&quot;: float(clean.number_of_superhero_friends.median()),
+}
+(HERE / &quot;data.json&quot;).write_text(json.dumps(payload))
+print(f&quot;Wrote 3 charts + data.json ({len(payload[&#x27;rows&#x27;])} rows, {int(raw.valid.sum())} valid)&quot;)
+</code></pre></div>
+</section>
+
+<section>
+ <h2><span class="n">6</span>Takeaways</h2>
+ <div class="takeaway">
+  <p style="margin:0 0 10px"><b>The lesson isn't the superheroes.</b> An AI/tool that just runs a t-test and reports
+   "p = 0.008, popular heroes recover worse" hands you the <em>opposite</em> of the truth.</p>
+  <p style="margin:0">Three habits would have caught it: &nbsp;<b>(1)</b> read the min/max before testing —
+   negative heal times are a tell; &nbsp;<b>(2)</b> compare robust vs. parametric stats — a Pearson/Spearman
+   sign flip screams "outliers"; &nbsp;<b>(3)</b> look for subgroups before trusting an aggregate p-value.</p>
+ </div>
+ <p style="font-size:14.5px;margin-top:14px"><b>So, the real answer:</b> among ordinary heroes, more popular ones
+  <b>heal faster</b>, with equal recovery quality. The "popularity hurts recovery" finding is an artifact of impossible
+  values and one outlier subgroup — not a real effect.</p>
+</section>
+
+<footer>
+ <b>Living document.</b> To update: edit <code>superheroes_dataset.csv</code> → run
+ <code>python3 make_charts.py</code> → <code>python3 build_site.py</code>. Open <code>index.html</code> in any browser.<br>
+ Meet the Moment · Data Session · updated 2026-06-05
+</footer>
+</div>
+
+<script>
+const DATA = {"rows": [{"hero_id": "HX-001", "number_of_superhero_friends": 11, "injury_heal_time_days": 21, "recovery_quality_score": 6, "outfit_color_code": "red", "average_hours_of_superhero_power_used_per_day": 5.0, "valid": true}, {"hero_id": "HX-002", "number_of_superhero_friends": 9, "injury_heal_time_days": 30, "recovery_quality_score": 8, "outfit_color_code": "silver", "average_hours_of_superhero_power_used_per_day": 2.2, "valid": true}, {"hero_id": "HX-003", "number_of_superhero_friends": 11, "injury_heal_time_days": 26, "recovery_quality_score": 8, "outfit_color_code": "black", "average_hours_of_superhero_power_used_per_day": 2.1, "valid": true}, {"hero_id": "HX-004", "number_of_superhero_friends": 14, "injury_heal_time_days": 18, "recovery_quality_score": 8, "outfit_color_code": "red", "average_hours_of_superhero_power_used_per_day": 9.8, "valid": true}, {"hero_id": "HX-005", "number_of_superhero_friends": 9, "injury_heal_time_days": 31, "recovery_quality_score": 10, "outfit_color_code": "red", "average_hours_of_superhero_power_used_per_day": 5.0, "valid": true}, {"hero_id": "HX-006", "number_of_superhero_friends": 9, "injury_heal_time_days": 34, "recovery_quality_score": 10, "outfit_color_code": "silver", "average_hours_of_superhero_power_used_per_day": 5.7, "valid": true}, {"hero_id": "HX-007", "number_of_superhero_friends": 14, "injury_heal_time_days": 31, "recovery_quality_score": 7, "outfit_color_code": "blue", "average_hours_of_superhero_power_used_per_day": 4.2, "valid": true}, {"hero_id": "HX-008", "number_of_superhero_friends": 12, "injury_heal_time_days": 27, "recovery_quality_score": 7, "outfit_color_code": "black", "average_hours_of_superhero_power_used_per_day": 10.0, "valid": true}, {"hero_id": "HX-009", "number_of_superhero_friends": 8, "injury_heal_time_days": 35, "recovery_quality_score": 6, "outfit_color_code": "silver", "average_hours_of_superhero_power_used_per_day": 3.8, "valid": true}, {"hero_id": "HX-010", "number_of_superhero_friends": 11, "injury_heal_time_days": 28, "recovery_quality_score": 5, "outfit_color_code": "red", "average_hours_of_superhero_power_used_per_day": 2.3, "valid": true}, {"hero_id": "HX-011", "number_of_superhero_friends": 8, "injury_heal_time_days": -5, "recovery_quality_score": 9, "outfit_color_code": "red", "average_hours_of_superhero_power_used_per_day": 3.0, "valid": false}, {"hero_id": "HX-012", "number_of_superhero_friends": 8, "injury_heal_time_days": 34, "recovery_quality_score": 9, "outfit_color_code": "silver", "average_hours_of_superhero_power_used_per_day": 4.6, "valid": true}, {"hero_id": "HX-013", "number_of_superhero_friends": 10, "injury_heal_time_days": 30, "recovery_quality_score": 7, "outfit_color_code": "black", "average_hours_of_superhero_power_used_per_day": 5.2, "valid": true}, {"hero_id": "HX-014", "number_of_superhero_friends": 4, "injury_heal_time_days": 54, "recovery_quality_score": 8, "outfit_color_code": "blue", "average_hours_of_superhero_power_used_per_day": 6.1, "valid": true}, {"hero_id": "HX-015", "number_of_superhero_friends": 4, "injury_heal_time_days": 41, "recovery_quality_score": 8, "outfit_color_code": "blue", "average_hours_of_superhero_power_used_per_day": 5.4, "valid": true}, {"hero_id": "HX-016", "number_of_superhero_friends": 8, "injury_heal_time_days": 36, "recovery_quality_score": 7, "outfit_color_code": "red", "average_hours_of_superhero_power_used_per_day": 7.9, "valid": true}, {"hero_id": "HX-017", "number_of_superhero_friends": 6, "injury_heal_time_days": 38, "recovery_quality_score": 5, "outfit_color_code": "black", "average_hours_of_superhero_power_used_per_day": 0.2, "valid": true}, {"hero_id": "HX-018", "number_of_superhero_friends": 10, "injury_heal_time_days": 24, "recovery_quality_score": 10, "outfit_color_code": "blue", "average_hours_of_superhero_power_used_per_day": 2.9, "valid": true}, {"hero_id": "HX-019", "number_of_superhero_friends": 7, "injury_heal_time_days": 42, "recovery_quality_score": 11, "outfit_color_code": "black", "average_hours_of_superhero_power_used_per_day": NaN, "valid": true}, {"hero_id": "HX-020", "number_of_superhero_friends": 5, "injury_heal_time_days": 44, "recovery_quality_score": 10, "outfit_color_code": "black", "average_hours_of_superhero_power_used_per_day": 0.0, "valid": true}, {"hero_id": "HX-021", "number_of_superhero_friends": 14, "injury_heal_time_days": 26, "recovery_quality_score": 9, "outfit_color_code": "red", "average_hours_of_superhero_power_used_per_day": 4.9, "valid": true}, {"hero_id": "HX-022", "number_of_superhero_friends": 9, "injury_heal_time_days": 28, "recovery_quality_score": 10, "outfit_color_code": "blue", "average_hours_of_superhero_power_used_per_day": 7.7, "valid": true}, {"hero_id": "HX-023", "number_of_superhero_friends": 10, "injury_heal_time_days": 37, "recovery_quality_score": 9, "outfit_color_code": "silver", "average_hours_of_superhero_power_used_per_day": 6.0, "valid": true}, {"hero_id": "HX-024", "number_of_superhero_friends": 5, "injury_heal_time_days": 33, "recovery_quality_score": 9, "outfit_color_code": "red", "average_hours_of_superhero_power_used_per_day": 4.4, "valid": true}, {"hero_id": "HX-025", "number_of_superhero_friends": 8, "injury_heal_time_days": 37, "recovery_quality_score": 10, "outfit_color_code": "blue", "average_hours_of_superhero_power_used_per_day": 4.9, "valid": true}, {"hero_id": "HX-026", "number_of_superhero_friends": 10, "injury_heal_time_days": 41, "recovery_quality_score": 9, "outfit_color_code": "blue", "average_hours_of_superhero_power_used_per_day": 7.1, "valid": true}, {"hero_id": "HX-027", "number_of_superhero_friends": 6, "injury_heal_time_days": 33, "recovery_quality_score": 10, "outfit_color_code": "blue", "average_hours_of_superhero_power_used_per_day": 6.3, "valid": true}, {"hero_id": "HX-028", "number_of_superhero_friends": 11, "injury_heal_time_days": 25, "recovery_quality_score": 10, "outfit_color_code": "blue", "average_hours_of_superhero_power_used_per_day": 7.3, "valid": true}, {"hero_id": "HX-029", "number_of_superhero_friends": 8, "injury_heal_time_days": 35, "recovery_quality_score": 7, "outfit_color_code": "blue", "average_hours_of_superhero_power_used_per_day": 9.5, "valid": true}, {"hero_id": "HX-030", "number_of_superhero_friends": 9, "injury_heal_time_days": 30, "recovery_quality_score": 10, "outfit_color_code": "black", "average_hours_of_superhero_power_used_per_day": 4.3, "valid": true}, {"hero_id": "HX-031", "number_of_superhero_friends": 8, "injury_heal_time_days": 26, "recovery_quality_score": 10, "outfit_color_code": "red", "average_hours_of_superhero_power_used_per_day": 5.6, "valid": true}, {"hero_id": "HX-032", "number_of_superhero_friends": 15, "injury_heal_time_days": 20, "recovery_quality_score": 9, "outfit_color_code": "black", "average_hours_of_superhero_power_used_per_day": 4.8, "valid": true}, {"hero_id": "HX-033", "number_of_superhero_friends": 9, "injury_heal_time_days": 27, "recovery_quality_score": 7, "outfit_color_code": "silver", "average_hours_of_superhero_power_used_per_day": 6.2, "valid": true}, {"hero_id": "HX-034", "number_of_superhero_friends": 6, "injury_heal_time_days": 40, "recovery_quality_score": 10, "outfit_color_code": "blue", "average_hours_of_superhero_power_used_per_day": 4.5, "valid": true}, {"hero_id": "HX-035", "number_of_superhero_friends": 12, "injury_heal_time_days": 21, "recovery_quality_score": 9, "outfit_color_code": "red", "average_hours_of_superhero_power_used_per_day": 6.4, "valid": true}, {"hero_id": "HX-036", "number_of_superhero_friends": 6, "injury_heal_time_days": 46, "recovery_quality_score": 10, "outfit_color_code": "blue", "average_hours_of_superhero_power_used_per_day": 9.1, "valid": true}, {"hero_id": "HX-037", "number_of_superhero_friends": 10, "injury_heal_time_days": 26, "recovery_quality_score": 10, "outfit_color_code": "red", "average_hours_of_superhero_power_used_per_day": 7.0, "valid": true}, {"hero_id": "HX-038", "number_of_superhero_friends": 4, "injury_heal_time_days": 40, "recovery_quality_score": 9, "outfit_color_code": "black", "average_hours_of_superhero_power_used_per_day": 3.4, "valid": true}, {"hero_id": "HX-039", "number_of_superhero_friends": 6, "injury_heal_time_days": 42, "recovery_quality_score": 9, "outfit_color_code": "red", "average_hours_of_superhero_power_used_per_day": 2.0, "valid": true}, {"hero_id": "HX-040", "number_of_superhero_friends": 10, "injury_heal_time_days": 24, "recovery_quality_score": 8, "outfit_color_code": "silver", "average_hours_of_superhero_power_used_per_day": 4.3, "valid": true}, {"hero_id": "HX-041", "number_of_superhero_friends": 12, "injury_heal_time_days": 27, "recovery_quality_score": 8, "outfit_color_code": "silver", "average_hours_of_superhero_power_used_per_day": 5.4, "valid": true}, {"hero_id": "HX-042", "number_of_superhero_friends": 10, "injury_heal_time_days": 37, "recovery_quality_score": 2, "outfit_color_code": "red", "average_hours_of_superhero_power_used_per_day": 3.0, "valid": true}, {"hero_id": "HX-043", "number_of_superhero_friends": 9, "injury_heal_time_days": 24, "recovery_quality_score": 9, "outfit_color_code": "red", "average_hours_of_superhero_power_used_per_day": 6.3, "valid": true}, {"hero_id": "HX-044", "number_of_superhero_friends": 9, "injury_heal_time_days": 33, "recovery_quality_score": 10, "outfit_color_code": "red", "average_hours_of_superhero_power_used_per_day": 4.1, "valid": true}, {"hero_id": "HX-045", "number_of_superhero_friends": 5, "injury_heal_time_days": 41, "recovery_quality_score": 7, "outfit_color_code": "red", "average_hours_of_superhero_power_used_per_day": 4.9, "valid": true}, {"hero_id": "HX-046", "number_of_superhero_friends": 7, "injury_heal_time_days": 40, "recovery_quality_score": 10, "outfit_color_code": "silver", "average_hours_of_superhero_power_used_per_day": 3.2, "valid": true}, {"hero_id": "HX-047", "number_of_superhero_friends": 8, "injury_heal_time_days": 28, "recovery_quality_score": 10, "outfit_color_code": "blue", "average_hours_of_superhero_power_used_per_day": 6.3, "valid": true}, {"hero_id": "HX-048", "number_of_superhero_friends": 13, "injury_heal_time_days": 17, "recovery_quality_score": 10, "outfit_color_code": "red", "average_hours_of_superhero_power_used_per_day": 3.9, "valid": true}, {"hero_id": "HX-049", "number_of_superhero_friends": 11, "injury_heal_time_days": 31, "recovery_quality_score": 10, "outfit_color_code": "red", "average_hours_of_superhero_power_used_per_day": 4.1, "valid": true}, {"hero_id": "HX-050", "number_of_superhero_friends": 4, "injury_heal_time_days": 44, "recovery_quality_score": 3, "outfit_color_code": "silver", "average_hours_of_superhero_power_used_per_day": 6.9, "valid": true}, {"hero_id": "HX-051", "number_of_superhero_friends": 10, "injury_heal_time_days": 31, "recovery_quality_score": 6, "outfit_color_code": "silver", "average_hours_of_superhero_power_used_per_day": 6.5, "valid": true}, {"hero_id": "HX-052", "number_of_superhero_friends": 8, "injury_heal_time_days": 36, "recovery_quality_score": 8, "outfit_color_code": "black", "average_hours_of_superhero_power_used_per_day": 5.3, "valid": true}, {"hero_id": "HX-053", "number_of_superhero_friends": 7, "injury_heal_time_days": 33, "recovery_quality_score": 10, "outfit_color_code": "red", "average_hours_of_superhero_power_used_per_day": 3.2, "valid": true}, {"hero_id": "HX-054", "number_of_superhero_friends": 11, "injury_heal_time_days": 29, "recovery_quality_score": 10, "outfit_color_code": "black", "average_hours_of_superhero_power_used_per_day": 3.7, "valid": true}, {"hero_id": "HX-055", "number_of_superhero_friends": 13, "injury_heal_time_days": 26, "recovery_quality_score": 10, "outfit_color_code": "silver", "average_hours_of_superhero_power_used_per_day": 6.1, "valid": true}, {"hero_id": "HX-056", "number_of_superhero_friends": 12, "injury_heal_time_days": 22, "recovery_quality_score": 10, "outfit_color_code": "silver", "average_hours_of_superhero_power_used_per_day": 8.7, "valid": true}, {"hero_id": "HX-057", "number_of_superhero_friends": 7, "injury_heal_time_days": 45, "recovery_quality_score": 9, "outfit_color_code": "blue", "average_hours_of_superhero_power_used_per_day": 0.1, "valid": true}, {"hero_id": "HX-058", "number_of_superhero_friends": 9, "injury_heal_time_days": 34, "recovery_quality_score": 8, "outfit_color_code": "red", "average_hours_of_superhero_power_used_per_day": 5.3, "valid": true}, {"hero_id": "HX-059", "number_of_superhero_friends": 10, "injury_heal_time_days": 24, "recovery_quality_score": 8, "outfit_color_code": "black", "average_hours_of_superhero_power_used_per_day": 8.2, "valid": true}, {"hero_id": "HX-060", "number_of_superhero_friends": 12, "injury_heal_time_days": 29, "recovery_quality_score": 10, "outfit_color_code": "silver", "average_hours_of_superhero_power_used_per_day": 2.9, "valid": true}, {"hero_id": "HX-061", "number_of_superhero_friends": 8, "injury_heal_time_days": 29, "recovery_quality_score": 3, "outfit_color_code": "silver", "average_hours_of_superhero_power_used_per_day": 6.8, "valid": true}, {"hero_id": "HX-062", "number_of_superhero_friends": 9, "injury_heal_time_days": 36, "recovery_quality_score": 8, "outfit_color_code": "black", "average_hours_of_superhero_power_used_per_day": 5.4, "valid": true}, {"hero_id": "HX-063", "number_of_superhero_friends": 6, "injury_heal_time_days": 44, "recovery_quality_score": 9, "outfit_color_code": "blue", "average_hours_of_superhero_power_used_per_day": 3.8, "valid": true}, {"hero_id": "HX-064", "number_of_superhero_friends": 6, "injury_heal_time_days": 34, "recovery_quality_score": 9, "outfit_color_code": "silver", "average_hours_of_superhero_power_used_per_day": 2.6, "valid": true}, {"hero_id": "HX-065", "number_of_superhero_friends": 12, "injury_heal_time_days": 31, "recovery_quality_score": 10, "outfit_color_code": "red", "average_hours_of_superhero_power_used_per_day": 5.2, "valid": true}, {"hero_id": "HX-066", "number_of_superhero_friends": 14, "injury_heal_time_days": 24, "recovery_quality_score": 10, "outfit_color_code": "silver", "average_hours_of_superhero_power_used_per_day": 0.5, "valid": true}, {"hero_id": "HX-067", "number_of_superhero_friends": 9, "injury_heal_time_days": 36, "recovery_quality_score": 10, "outfit_color_code": "red", "average_hours_of_superhero_power_used_per_day": 5.1, "valid": true}, {"hero_id": "HX-068", "number_of_superhero_friends": 13, "injury_heal_time_days": 34, "recovery_quality_score": 7, "outfit_color_code": "black", "average_hours_of_superhero_power_used_per_day": 5.0, "valid": true}, {"hero_id": "HX-069", "number_of_superhero_friends": 11, "injury_heal_time_days": 27, "recovery_quality_score": 10, "outfit_color_code": "red", "average_hours_of_superhero_power_used_per_day": 8.5, "valid": true}, {"hero_id": "HX-070", "number_of_superhero_friends": 8, "injury_heal_time_days": 30, "recovery_quality_score": 10, "outfit_color_code": "black", "average_hours_of_superhero_power_used_per_day": 2.7, "valid": true}, {"hero_id": "HX-071", "number_of_superhero_friends": 11, "injury_heal_time_days": 24, "recovery_quality_score": 10, "outfit_color_code": "red", "average_hours_of_superhero_power_used_per_day": 1.8, "valid": true}, {"hero_id": "HX-072", "number_of_superhero_friends": 14, "injury_heal_time_days": 18, "recovery_quality_score": 10, "outfit_color_code": "black", "average_hours_of_superhero_power_used_per_day": 0.4, "valid": true}, {"hero_id": "HX-073", "number_of_superhero_friends": 9, "injury_heal_time_days": 32, "recovery_quality_score": 6, "outfit_color_code": "red", "average_hours_of_superhero_power_used_per_day": 5.4, "valid": true}, {"hero_id": "HX-074", "number_of_superhero_friends": 14, "injury_heal_time_days": 24, "recovery_quality_score": 8, "outfit_color_code": "blue", "average_hours_of_superhero_power_used_per_day": 8.6, "valid": true}, {"hero_id": "HX-075", "number_of_superhero_friends": 2, "injury_heal_time_days": 47, "recovery_quality_score": 9, "outfit_color_code": "red", "average_hours_of_superhero_power_used_per_day": 7.9, "valid": true}, {"hero_id": "HX-076", "number_of_superhero_friends": 12, "injury_heal_time_days": 30, "recovery_quality_score": 10, "outfit_color_code": "red", "average_hours_of_superhero_power_used_per_day": 4.9, "valid": true}, {"hero_id": "HX-077", "number_of_superhero_friends": 10, "injury_heal_time_days": 30, "recovery_quality_score": 9, "outfit_color_code": "blue", "average_hours_of_superhero_power_used_per_day": 4.9, "valid": true}, {"hero_id": "HX-078", "number_of_superhero_friends": 9, "injury_heal_time_days": 39, "recovery_quality_score": 9, "outfit_color_code": "silver", "average_hours_of_superhero_power_used_per_day": 4.6, "valid": true}, {"hero_id": "HX-079", "number_of_superhero_friends": 10, "injury_heal_time_days": 29, "recovery_quality_score": 10, "outfit_color_code": "silver", "average_hours_of_superhero_power_used_per_day": 2.3, "valid": true}, {"hero_id": "HX-080", "number_of_superhero_friends": 4, "injury_heal_time_days": 56, "recovery_quality_score": 10, "outfit_color_code": "red", "average_hours_of_superhero_power_used_per_day": 3.6, "valid": true}, {"hero_id": "HX-081", "number_of_superhero_friends": 9, "injury_heal_time_days": 35, "recovery_quality_score": 10, "outfit_color_code": "blue", "average_hours_of_superhero_power_used_per_day": 9.8, "valid": true}, {"hero_id": "HX-082", "number_of_superhero_friends": 11, "injury_heal_time_days": 24, "recovery_quality_score": 9, "outfit_color_code": "red", "average_hours_of_superhero_power_used_per_day": 3.7, "valid": true}, {"hero_id": "HX-083", "number_of_superhero_friends": 14, "injury_heal_time_days": 17, "recovery_quality_score": 8, "outfit_color_code": "black", "average_hours_of_superhero_power_used_per_day": 5.0, "valid": true}, {"hero_id": "HX-084", "number_of_superhero_friends": 8, "injury_heal_time_days": 36, "recovery_quality_score": 10, "outfit_color_code": "black", "average_hours_of_superhero_power_used_per_day": 8.9, "valid": true}, {"hero_id": "HX-085", "number_of_superhero_friends": 7, "injury_heal_time_days": 35, "recovery_quality_score": 10, "outfit_color_code": "red", "average_hours_of_superhero_power_used_per_day": 3.0, "valid": true}, {"hero_id": "HX-086", "number_of_superhero_friends": 8, "injury_heal_time_days": -8, "recovery_quality_score": 9, "outfit_color_code": "silver", "average_hours_of_superhero_power_used_per_day": 5.6, "valid": false}, {"hero_id": "HX-087", "number_of_superhero_friends": 12, "injury_heal_time_days": 28, "recovery_quality_score": 9, "outfit_color_code": "silver", "average_hours_of_superhero_power_used_per_day": 2.1, "valid": true}, {"hero_id": "HX-088", "number_of_superhero_friends": 10, "injury_heal_time_days": 30, "recovery_quality_score": 6, "outfit_color_code": "red", "average_hours_of_superhero_power_used_per_day": 7.1, "valid": true}, {"hero_id": "HX-089", "number_of_superhero_friends": 8, "injury_heal_time_days": 30, "recovery_quality_score": 8, "outfit_color_code": "red", "average_hours_of_superhero_power_used_per_day": 180.0, "valid": false}, {"hero_id": "HX-090", "number_of_superhero_friends": 11, "injury_heal_time_days": 20, "recovery_quality_score": 10, "outfit_color_code": "black", "average_hours_of_superhero_power_used_per_day": 5.5, "valid": true}, {"hero_id": "HX-091", "number_of_superhero_friends": 10, "injury_heal_time_days": 28, "recovery_quality_score": 10, "outfit_color_code": "silver", "average_hours_of_superhero_power_used_per_day": 6.1, "valid": true}, {"hero_id": "HX-092", "number_of_superhero_friends": 12, "injury_heal_time_days": 30, "recovery_quality_score": 8, "outfit_color_code": "red", "average_hours_of_superhero_power_used_per_day": 2.2, "valid": true}, {"hero_id": "HX-093", "number_of_superhero_friends": -7, "injury_heal_time_days": 37, "recovery_quality_score": 10, "outfit_color_code": "black", "average_hours_of_superhero_power_used_per_day": 5.8, "valid": false}, {"hero_id": "HX-094", "number_of_superhero_friends": 9, "injury_heal_time_days": 26, "recovery_quality_score": 9, "outfit_color_code": "silver", "average_hours_of_superhero_power_used_per_day": 6.6, "valid": true}, {"hero_id": "HX-095", "number_of_superhero_friends": 8, "injury_heal_time_days": 35, "recovery_quality_score": 4, "outfit_color_code": "blue", "average_hours_of_superhero_power_used_per_day": 5.7, "valid": true}, {"hero_id": "HX-096", "number_of_superhero_friends": 5, "injury_heal_time_days": 42, "recovery_quality_score": 9, "outfit_color_code": "black", "average_hours_of_superhero_power_used_per_day": 6.4, "valid": true}, {"hero_id": "HX-097", "number_of_superhero_friends": 10, "injury_heal_time_days": 26, "recovery_quality_score": 10, "outfit_color_code": "silver", "average_hours_of_superhero_power_used_per_day": 5.1, "valid": true}, {"hero_id": "HX-098", "number_of_superhero_friends": 10, "injury_heal_time_days": 31, "recovery_quality_score": 8, "outfit_color_code": "silver", "average_hours_of_superhero_power_used_per_day": 5.5, "valid": true}, {"hero_id": "HX-099", "number_of_superhero_friends": 10, "injury_heal_time_days": 30, "recovery_quality_score": 9, "outfit_color_code": "black", "average_hours_of_superhero_power_used_per_day": 5.8, "valid": true}, {"hero_id": "HX-100", "number_of_superhero_friends": 9, "injury_heal_time_days": 26, "recovery_quality_score": 9, "outfit_color_code": "blue", "average_hours_of_superhero_power_used_per_day": 5.5, "valid": true}, {"hero_id": "HX-101", "number_of_superhero_friends": 40, "injury_heal_time_days": 87, "recovery_quality_score": 7, "outfit_color_code": "gold", "average_hours_of_superhero_power_used_per_day": 1.8, "valid": true}, {"hero_id": "HX-102", "number_of_superhero_friends": 42, "injury_heal_time_days": 90, "recovery_quality_score": 3, "outfit_color_code": "gold", "average_hours_of_superhero_power_used_per_day": 1.0, "valid": true}, {"hero_id": "HX-103", "number_of_superhero_friends": 45, "injury_heal_time_days": 88, "recovery_quality_score": 2, "outfit_color_code": "gold", "average_hours_of_superhero_power_used_per_day": 5.1, "valid": true}, {"hero_id": "HX-104", "number_of_superhero_friends": 38, "injury_heal_time_days": 100, "recovery_quality_score": 9, "outfit_color_code": "gold", "average_hours_of_superhero_power_used_per_day": 7.7, "valid": true}, {"hero_id": "HX-105", "number_of_superhero_friends": 41, "injury_heal_time_days": 86, "recovery_quality_score": 2, "outfit_color_code": "gold", "average_hours_of_superhero_power_used_per_day": 4.8, "valid": true}, {"hero_id": "HX-106", "number_of_superhero_friends": 43, "injury_heal_time_days": 75, "recovery_quality_score": 7, "outfit_color_code": "gold", "average_hours_of_superhero_power_used_per_day": 5.3, "valid": true}, {"hero_id": "HX-107", "number_of_superhero_friends": 45, "injury_heal_time_days": 88, "recovery_quality_score": 6, "outfit_color_code": "gold", "average_hours_of_superhero_power_used_per_day": 8.0, "valid": true}, {"hero_id": "HX-108", "number_of_superhero_friends": 48, "injury_heal_time_days": 105, "recovery_quality_score": 1, "outfit_color_code": "gold", "average_hours_of_superhero_power_used_per_day": 7.5, "valid": true}, {"hero_id": "HX-109", "number_of_superhero_friends": 50, "injury_heal_time_days": 98, "recovery_quality_score": 6, "outfit_color_code": "gold", "average_hours_of_superhero_power_used_per_day": 5.6, "valid": true}, {"hero_id": "HX-110", "number_of_superhero_friends": 52, "injury_heal_time_days": 92, "recovery_quality_score": 1, "outfit_color_code": "gold", "average_hours_of_superhero_power_used_per_day": NaN, "valid": true}], "median_friends_clean": 10.0};
+const NAVY="#1c487b", TEAL="#2bb3a3", GOLD="#d9a521";
+const rows = DATA.rows.filter(r => r.valid);
+const reg = rows.filter(r => r.outfit_color_code!=="gold");
+const gold = rows.filter(r => r.outfit_color_code==="gold");
+const pt = r => ({x:r.number_of_superhero_friends, y:r.injury_heal_time_days});
+// linear fit on regular heroes
+function fit(pts){let n=pts.length,sx=0,sy=0,sxy=0,sxx=0;pts.forEach(p=>{sx+=p.x;sy+=p.y;sxy+=p.x*p.y;sxx+=p.x*p.x});
+ let m=(n*sxy-sx*sy)/(n*sxx-sx*sx),b=(sy-m*sx)/n;let xs=pts.map(p=>p.x);
+ let lo=Math.min(...xs),hi=Math.max(...xs);return [{x:lo,y:m*lo+b},{x:hi,y:m*hi+b}];}
+const trend = fit(reg.map(pt));
+const scatter = new Chart(document.getElementById("scatter"),{type:"scatter",
+ data:{datasets:[
+  {label:"Regular heroes",data:reg.map(pt),backgroundColor:TEAL,pointRadius:4},
+  {label:"Gold subgroup",data:gold.map(pt),backgroundColor:GOLD,borderColor:NAVY,borderWidth:1,pointRadius:5.5},
+  {label:"Trend (regular): more friends → faster heal",data:trend,type:"line",borderColor:NAVY,borderDash:[6,5],borderWidth:2,pointRadius:0,fill:false}
+ ]},
+ options:{plugins:{legend:{labels:{boxWidth:12,font:{size:11}}}},
+  scales:{x:{title:{display:true,text:"Number of superhero friends (popularity →)"}},
+   y:{title:{display:true,text:"Heal time (days) — ↓ better"}}}}});
+document.getElementById("goldToggle").addEventListener("change",e=>{
+ scatter.setDatasetVisibility(1,e.target.checked);scatter.update();});
+
+function med(arr){arr=arr.slice().sort((a,b)=>a-b);let n=arr.length;return n?(n%2?arr[(n-1)/2]:(arr[n/2-1]+arr[n/2])/2):0;}
+function split(rs){let f=rs.map(r=>r.number_of_superhero_friends),m=med(f);
+ let pop=rs.filter(r=>r.number_of_superhero_friends>m),non=rs.filter(r=>r.number_of_superhero_friends<=m);
+ return [med(pop.map(r=>r.injury_heal_time_days)), med(non.map(r=>r.injury_heal_time_days))];}
+const allM=split(rows), nogM=split(reg);
+new Chart(document.getElementById("bars"),{type:"bar",
+ data:{labels:["Popular","Nonpopular"],datasets:[
+  {label:"All heroes (raw)",data:allM,backgroundColor:"#9aa5b1"},
+  {label:"Gold removed",data:nogM,backgroundColor:TEAL}]},
+ options:{plugins:{legend:{labels:{boxWidth:12}}},
+  scales:{y:{title:{display:true,text:"Median heal time (days) — ↓ better"}}}}});
+
+document.querySelectorAll("#tabs button").forEach(b=>b.addEventListener("click",()=>{
+ document.querySelectorAll("#tabs button").forEach(x=>x.classList.remove("active"));
+ b.classList.add("active");
+ ["c1","c2","c3"].forEach(id=>document.getElementById(id).style.display="none");
+ document.getElementById(b.dataset.t).style.display="block";}));
+hljs.highlightAll();
+</script>
+</body></html>
